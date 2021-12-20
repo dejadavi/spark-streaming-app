@@ -4,6 +4,7 @@ set -e -uf -o pipefail
 
 build () {
 
+  rm -rf logs
   mkdir -p logs
   docker-compose build --no-cache  ingest
   docker-compose build --no-cache spark-app

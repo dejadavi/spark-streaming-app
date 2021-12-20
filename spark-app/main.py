@@ -12,7 +12,8 @@ class Pipeline(object):
         spark: SparkSession = SparkSession \
             .builder \
             .appName("SparkStreamingApp") \
-            .config("spark.jars.packages", "spark-sql-kafka-0-10_2.12") \
+            .config("spark.jars.packages",
+                    "org.apache.spark:spark-sql-kafka-0-10_2.12:2.4.0") \
             .getOrCreate()
 
         return spark

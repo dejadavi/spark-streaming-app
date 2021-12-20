@@ -25,7 +25,7 @@ run () {
   docker-compose build spark-app
   #Prime logs for cold start
   get_log
-  docker-compose run spark-app
+  docker-compose -u 5000:5000 run spark-app
 
 }
 

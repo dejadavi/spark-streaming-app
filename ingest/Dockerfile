@@ -25,4 +25,6 @@ RUN chown -R $GID:$UID /opt/scripts/copy_logs.sh &&\
 # Apply cron job
 RUN crontab /etc/cron.d/cronjob
 
+USER $GID:$UID
+
 CMD cron

@@ -1,7 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming import  DataStreamReader, StreamingQuery, StreamingQueryManager
-from pyspark.sql.functions import explode, col
+from pyspark.sql.functions import explode, col, date_format, current_date
+from .schema import NvdSchema
 
 
 class Pipeline(object):
@@ -12,8 +13,9 @@ class Pipeline(object):
         spark: SparkSession = SparkSession \
             .builder \
             .appName("SparkStreamingApp") \
+            .master("local[*]")\
             .config("spark.jars.packages",
-                    "org.apache.spark:spark-sql-kafka-0-10_2.12:2.4.0") \
+                    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.0") \
             .getOrCreate()
 
         return spark
@@ -25,6 +27,8 @@ class Pipeline(object):
 
         raw: DataStreamReader = spark.readStream \
             .format("json")\
+            .option("schema", NvdSchema)\
+            .option("mode", "FAILFAST")\
             .load(path)
 
         return raw
@@ -35,7 +39,8 @@ class Pipeline(object):
                   datastream: DataStreamReader ) -> DataFrame:
 
         transformed: StreamingQuery = datastream\
-            .withColumn("final", explode(col("*")))
+            .withColumn("CVE_Item", explode(col("CVE_Items")))\
+            .select(col("CVE_Item.*"))
 
         transformed.printSchema()
 
@@ -44,13 +49,15 @@ class Pipeline(object):
     @classmethod
     def write(cls,
               spark: SparkSession,
-             query: StreamingQuery) -> StreamingQueryManager:
+              query: StreamingQuery) -> StreamingQueryManager:
 
         query.start()
 
         query\
             .writeStream\
-            .save()
+            .format("orc")\
+            .partitionBy(date_format(col(current_date()), "YYYY-mm-dd"))\
+            .saveAsTable("prod.cve_data_by_hour")
 
         return query
 

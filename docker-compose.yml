@@ -1,16 +1,30 @@
 version: "3.9"
 services:
   ingest:
+    user: 5000:5000
     build:
       context: ./ingest
       dockerfile: Dockerfile
     volumes:
       - ./logs:/local/logs
   spark-app:
+    user: 5000:5000
     build:
-      context: ./spark-app
+      context: ./spark_app
       dockerfile: Dockerfile
     volumes:
       - ./logs:/local/logs
+    depends_on:
+      - ingest
+  spark-shell:
+    user: 5000:5000
+    build:
+      context: ./spark_app
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/local/logs
+      - ./spark_app:/opt/spark_app
+    command: "bash"
+    working_dir: "/opt/spark_app"
     depends_on:
       - ingest

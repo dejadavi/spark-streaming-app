@@ -17,18 +17,20 @@ RUN python3 -m pip install pyspark\
     mypy\
     pyarrow
 
-RUN mkdir -p /opt/spark-app
+RUN mkdir -p /opt/spark_app
 RUN mkdir -p /local/logs
 
-COPY *.py /opt/spark-app/
+COPY *.py /opt/spark_app/
 
 RUN chown -R  $GID:$UID /local/logs \
     && chown -R  $GID:$UID /tmp \
-    && chown -R  $GID:$UID /opt/spark-app
+    && chown -R  $GID:$UID /opt/spark_app
 
-RUN python3 -m pip install -e /opt/spark-app
+RUN python3 -m pip install -e /opt/spark_app
 
-ENTRYPOINT["bash", ]
-CMD ["python3", "/opt/spark-app/main.py"]
+
+USER $GID:$UID
+
+CMD ["python3", "/opt/spark_app/job.py"]
 
 

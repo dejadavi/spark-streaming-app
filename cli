@@ -6,8 +6,8 @@ build () {
 
   mkdir -p ./logs
   rm -rf ./logs/*
-  docker-compose build --no-cache  ingest
-  docker-compose build --no-cache spark-app
+  docker-compose build ingest
+  docker-compose build spark-app
 }
 
 
@@ -15,18 +15,22 @@ get_log () {
 
   mkdir -p ./logs
   docker-compose build ingest
-  docker-compose run -v ./logs:/local/logs -u 5000:5000 ingest bash -c /opt/scripts/copy_logs.sh
+  docker-compose run  ingest bash -c "/opt/scripts/copy_logs.sh"
 }
 
 
-run () {
+spark_app () {
 
-  docker-compose build ingest
-  docker-compose build spark-app
   #Prime logs for cold start
   get_log
-  docker-compose -u 5000:5000 run spark-app
+  docker-compose  run spark-app
 
+}
+
+
+spark_shell () {
+  #Prime logs for cold start
+  docker-compose  run spark-shell
 }
 
 "$@"

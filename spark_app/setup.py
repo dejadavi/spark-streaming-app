@@ -7,4 +7,12 @@ setup(
     package_dir={
         "": ".",
     },
+    requires=[
+        "pyspark",
+        "pandas",
+        "build",
+        "mypy",
+        "Click",
+        "pyarrow"
+    ]
 )

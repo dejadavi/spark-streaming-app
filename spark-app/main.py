@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql import DataFrame,  DataStreamReader, StreamingQuery,\
-    StreamingQueryManager
+from pyspark.sql import DataFrame
+from pyspark.sql.streaming import  DataStreamReader, StreamingQuery, StreamingQueryManager
 from pyspark.sql.functions import explode, col
 
 

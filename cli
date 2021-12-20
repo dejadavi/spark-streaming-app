@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e -uf -o pipefail
+
+
+build () {
+
+  mkdir -p logs
+  docker-compose build --no-cache  ingest
+  docker-compose build --no-cache spark-app
+}
+
+
+get_log () {
+
+  mkdir -p logs
+  docker-compose build ingest
+  docker-compose run -v ./logs:/local/logs -u 5000:5000 ingest bash -c /opt/scripts/copy_logs.sh
+}
+
+
+run () {
+
+  docker-compose build ingest
+  docker-compose build spark-app
+  #Prime logs for cold start
+  get_log
+  docker-compose run -d spark-app
+
+}
+
+"$@"
+
+

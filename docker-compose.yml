@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  ingest:
+    build:
+      context: ./ingest
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/local/logs
+  spark-app:
+    build:
+      context: ./spark-app
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/local/logs
+    depends_on:
+      - ingest

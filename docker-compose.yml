@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./logs:/local/logs
+      - ./spark_app:/opt/spark_app
+      - ./tmp:/tmp
   spark-app:
     user: 5000:5000
     build:
@@ -14,6 +16,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./logs:/local/logs
+      - ./spark_app:/opt/spark_app
+      - ./tmp:/tmp
     depends_on:
       - ingest
   spark-shell:
@@ -24,6 +28,7 @@ services:
     volumes:
       - ./logs:/local/logs
       - ./spark_app:/opt/spark_app
+      - ./tmp:/tmp
     command: "bash"
     working_dir: "/opt/spark_app"
     depends_on:

@@ -2,7 +2,7 @@
 
 set -euf -o pipefail;
 
-DW_DATE=$(date +"%Y-%m-%dT%H:%00:0000%z")
+DW_DATE=$(date +"%Y-%m-%dT%H:00:0000%z")
 FILE_NAME="nvdcve-1.1-modified.json.gz"
 FILE_PATH="https://nvd.nist.gov/feeds/json/cve/1.1/${FILE_NAME}"
 BASE_PATH="dw_date=${DW_DATE}"

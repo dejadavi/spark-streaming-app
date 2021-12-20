@@ -28,6 +28,6 @@ RUN chown -R  $GID:$UID /local/logs \
 
 RUN python3 -m pip install -e /opt/spark-app
 
-CMD ['python3', '/opt/spark-app/main.py']
+CMD ['python', '/opt/spark-app/main.py']
 
 

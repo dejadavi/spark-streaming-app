@@ -55,7 +55,7 @@ class Pipeline(object):
 
     @classmethod
     def run(cls,
-            path: str = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-modified.json.gz") -> DataFrame:
+            path: str = "/local/logs/*") -> DataFrame:
 
         spark: SparkSession = cls.get_spark()
         read: DataFrame = cls.read(spark, path)

@@ -1,7 +1,79 @@
 from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame,  DataStreamReader, StreamingQuery,\
+    StreamingQueryManager
+from pyspark.sql.functions import explode, col
 
-spark: SparkSession  = SparkSession \
-    .builder \
-    .appName("Python Spark SQL basic example") \
-    .config("spar.jars.config", "some-value") \
-    .getOrCreate()
+
+class Pipeline(object):
+
+    @classmethod
+    def get_spark(cls) -> SparkSession:
+
+        spark: SparkSession = SparkSession \
+            .builder \
+            .appName("SparkStreamingApp") \
+            .config("spark.jars.packages", "spark-sql-kafka-0-10_2.12") \
+            .getOrCreate()
+
+        return spark
+
+    @classmethod
+    def read(cls,
+             spark: SparkSession,
+             path: str) -> DataFrame:
+
+        raw: DataStreamReader = spark.readStream \
+            .format("json")\
+            .load(path)
+
+        return raw
+
+    @classmethod
+    def transform(cls,
+                  spark: SparkSession,
+                  datastream: DataStreamReader ) -> DataFrame:
+
+        transformed: StreamingQuery = datastream\
+            .withColumn("final", explode(col("*")))
+
+        transformed.printSchema()
+
+        return transformed
+
+    @classmethod
+    def write(cls,
+              spark: SparkSession,
+             query: StreamingQuery) -> StreamingQueryManager:
+
+        query.start()
+
+        query\
+            .writeStream\
+            .save()
+
+        return query
+
+    @classmethod
+    def run(cls,
+            path: str = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-modified.json.gz") -> DataFrame:
+
+        spark: SparkSession = cls.get_spark()
+        read: DataFrame = cls.read(spark, path)
+        transformed: DataFrame = cls.transform(spark,read)
+        written: StreamingQueryManager = cls.write(spark, transformed)
+
+        return written
+
+
+def main():
+
+    Pipeline.run()
+
+
+if __name__ == "__main__":
+
+    main()
+
+
+
+

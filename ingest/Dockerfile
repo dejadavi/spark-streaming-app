@@ -27,5 +27,5 @@ RUN crontab /etc/cron.d/cronjob
 
 USER $GID:$UID
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/bin/bash"]
+
 CMD ["cron",]

@@ -9,7 +9,7 @@ ENV PATH=$PATH:/usr/local/lib
 RUN groupadd -g $GID -o $UNAME
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME
 
-RUN apt-get update && apt-get install python3-pip wget  cron dumb-init -y
+RUN apt-get update && apt-get install python3-pip wget  cron -y
 
 RUN python3 -m pip install pyspark\
     pandas\
@@ -31,9 +31,8 @@ RUN chown -R  $GID:$UID /local/logs \
 USER $GID:$UID
 ENV PATH=$PATH:/usr/local/lib:/home/appuser/.local/bin
 WORKDIR /opt/spark_app
-RUN python3 -m pip install --force-reinstall -e .
+RUN python3 -m pip install -e .
 RUN export PATH=$PATH:/usr/local/lib:/home/appuser/.local/bin
 WORKDIR /home/appuser
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/bin/bash", "spark-app"]
-CMD [ "run"]
+CMD ["spark-app", "run",]
 

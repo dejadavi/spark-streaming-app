@@ -10,7 +10,7 @@ def cli():
 
 @cli.command()
 @click.option('--in-path',"-p", default=IN_PATH,
-              type=click.Path(exists=True),
+              type=click.Path(exists=True, dir_okay=True),
               required=False,
               envvar="IN_PATH",
               help='HDFS-style path of the log files.')

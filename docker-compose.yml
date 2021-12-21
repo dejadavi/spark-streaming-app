@@ -6,6 +6,7 @@ services:
       context: ./ingest
       dockerfile: Dockerfile
     working_dir: "/home/appuser"
+    command: ["cron",]
     volumes:
       - ./logs:/local/logs
       - ./spark_app:/opt/spark_app
@@ -18,19 +19,21 @@ services:
     volumes:
       - ./logs:/local/logs
       - ./spark_app:/opt/spark_app
+      - ./tmp:/tmp
     working_dir: "/home/appuser"
     depends_on:
       - ingest
+    command: ["spark-app", "run"]
   spark-shell:
     user: 5000:5000
     build:
       context: ./spark_app
       dockerfile: Dockerfile
+    entrypoint: ["/bin/bash"]
     volumes:
       - ./logs:/local/logs
       - ./spark_app:/opt/spark_app
       - ./tmp:/tmp
-    command: "bash"
     working_dir: "/home/appuser"
     depends_on:
       - ingest

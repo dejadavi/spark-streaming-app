@@ -18,7 +18,6 @@ services:
     volumes:
       - ./logs:/local/logs
       - ./spark_app:/opt/spark_app
-      - ./tmp:/tmp
     working_dir: "/opt/spark_app"
     depends_on:
       - ingest

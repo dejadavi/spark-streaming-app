@@ -42,7 +42,7 @@ shell () {
 
 
 run (){
-  build
+  get_log
   spark_app
 }
 

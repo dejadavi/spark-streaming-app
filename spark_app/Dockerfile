@@ -30,10 +30,15 @@ RUN chown -R  $GID:$UID /local/logs \
 
 USER $GID:$UID
 
+ENV PATH=$PATH:/usr/local/lib:/home/appuser/.local/bin
+
 WORKDIR /opt/spark_app
 
-RUN python3 -m pip install .
+RUN python3 -m pip install --force-reinstall -e .
 
+RUN export PATH=$PATH:/usr/local/lib:/home/appuser/.local/bin
 
-CMD ["python3", "cli.py"]
+WORKDIR /home/appuser
+
+CMD ["/bin/bash", "spark_app", "run"]
 

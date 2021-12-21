@@ -8,6 +8,7 @@ from pyspark.sql.streaming import  DataStreamReader, StreamingQuery, StreamingQu
 from pyspark.sql.functions import explode, col, date_format, current_date
 
 from schema import NvdSchema
+from settings import SPARK_PACKAGES
 
 
 LOGGER: Logger = logging.getLogger(__name__)
@@ -27,8 +28,7 @@ class Job(object):
             .config("spark.local.dir", "/tmp/spark-temp")\
             .config("spark.sql.sources.partitionOverwriteMode", "dynamic")\
             .config("spark.sql.warehouse.dir","/tmp/spark-warehouse")\
-            .config("spark.jars.packages",
-                    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.0,mysql:mysql-connector-java:8.0.27") \
+            .config("spark.jars.packages",SPARK_PACKAGES) \
             .enableHiveSupport()\
             .getOrCreate()
 

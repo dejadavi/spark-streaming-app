@@ -7,7 +7,7 @@ get_log () {
 
   mkdir -p ./logs
   docker-compose build ingest
-  docker-compose run  ingest bash -c "/opt/scripts/copy_logs.sh"
+  docker-compose run  --rm  ingest bash -c "/opt/scripts/copy_logs.sh"
 }
 
 
@@ -21,7 +21,6 @@ build () {
 
   docker-compose build ingest
   docker-compose build spark-app
-  get_log
 }
 
 
@@ -30,19 +29,18 @@ build () {
 spark_app () {
 
   #Prime logs for cold start
-  docker-compose  run spark-app
+  docker-compose  run --rm spark-app
 
 }
 
 
 shell () {
   #Prime logs for cold start
-  docker-compose  run spark-shell
+  docker-compose  run --rm spark-shell
 }
 
 
 run (){
-  get_log
   spark_app
 }
 

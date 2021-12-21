@@ -1,3 +1,9 @@
 *.iml
 *logs
 *.idea
+*metastore_db
+*.egg-info
+*.log
+*tmp
+*.pyc
+**__pyfiles__

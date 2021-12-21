@@ -14,5 +14,9 @@ setup(
         "mypy",
         "Click",
         "pyarrow"
-    ]
+    ],
+    entry_points='''
+        [console_scripts]
+        spark-app=cli:run
+    ''',
 )

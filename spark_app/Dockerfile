@@ -4,7 +4,7 @@ FROM openjdk:8-jdk
 ENV GID=5000
 ENV UID=5000
 ENV UNAME=appuser
-
+ENV PATH=$PATH:/usr/local/lib
 
 RUN groupadd -g $GID -o $UNAME
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME
@@ -17,8 +17,10 @@ RUN python3 -m pip install pyspark\
     mypy\
     pyarrow
 
-RUN mkdir -p /opt/spark_app
-RUN mkdir -p /local/logs
+RUN mkdir -p /opt/spark_app &&\
+    mkdir -p /local/logs &&\
+    mkdir -p /tmp/spark-tmp &&\
+    mkdir -p /tmp/spark-warehouse
 
 COPY *.py /opt/spark_app/
 
@@ -26,11 +28,12 @@ RUN chown -R  $GID:$UID /local/logs \
     && chown -R  $GID:$UID /tmp \
     && chown -R  $GID:$UID /opt/spark_app
 
-RUN python3 -m pip install -e /opt/spark_app
-
-
 USER $GID:$UID
 
-CMD ["python3", "/opt/spark_app/job.py"]
+WORKDIR /opt/spark_app
 
+RUN python3 -m pip install .
+
+
+CMD ["python3", "cli.py"]
 

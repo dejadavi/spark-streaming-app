@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -uf -o pipefail
+set -e -u -o pipefail
 
 
 
@@ -15,8 +15,10 @@ build () {
 
   mkdir -p ./logs
   rm -rf ./logs/*
+
   mkdir -p ./tmp
   rm -rf ./tmp/*
+
   docker-compose build ingest
   docker-compose build spark-app
   get_log
@@ -28,15 +30,20 @@ build () {
 spark_app () {
 
   #Prime logs for cold start
-  get_log
   docker-compose  run spark-app
 
 }
 
 
-spark_shell () {
+shell () {
   #Prime logs for cold start
   docker-compose  run spark-shell
+}
+
+
+run (){
+  build
+  spark_app
 }
 
 "$@"

@@ -1,13 +1,20 @@
+import logging
+from logging import Logger
+from functools import partial
+
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming import  DataStreamReader, StreamingQuery, StreamingQueryManager
 from pyspark.sql.functions import explode, col, date_format, current_date
+
 from schema import NvdSchema
-from typing import Callable
-from functools import partial
 
 
-class Pipeline(object):
+LOGGER: Logger = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+
+
+class Job(object):
 
     @classmethod
     def get_spark(cls) -> SparkSession:
@@ -15,9 +22,13 @@ class Pipeline(object):
         spark: SparkSession = SparkSession \
             .builder \
             .appName("SparkStreamingApp") \
-            .master("local[*]")\
+            .master("local[*]") \
+            .config("spark.sql.hive.metastore.jar", "maven") \
+            .config("spark.local.dir", "/tmp/spark-temp")\
+            .config("spark.sql.sources.partitionOverwriteMode", "dynamic")\
+            .config("spark.sql.warehouse.dir","/tmp/spark-warehouse")\
             .config("spark.jars.packages",
-                    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.0") \
+                    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.0,mysql:mysql-connector-java:8.0.27") \
             .enableHiveSupport()\
             .getOrCreate()
 
@@ -26,12 +37,14 @@ class Pipeline(object):
     @classmethod
     def read(cls,
              spark: SparkSession,
-             path: str) -> DataFrame:
+             in_path: str) -> DataFrame:
 
         raw: DataStreamReader = spark.readStream \
-            .json(path=path,
-                  schema=NvdSchema,
-                  mode="FAILFAST")
+            .format("json")\
+            .schema(NvdSchema)\
+            .option("mode","FAILFAST") \
+            .option("multiline", True)\
+            .load(path=in_path)
 
         raw.printSchema()
 
@@ -40,33 +53,29 @@ class Pipeline(object):
     @classmethod
     def transform(cls,
                   spark: SparkSession,
-                  datastream: DataStreamReader ) -> DataFrame:
+                  datastream: DataStreamReader ) -> StreamingQuery:
 
         transformed: StreamingQuery = datastream\
             .withColumn("CVE_Item", explode(col("CVE_Items")))\
             .select(col("CVE_Item.*"),
-                    date_format(current_date(),
-                                "YYYY-mm-dd").alias("dw_date"))
+                    date_format(current_date(),"yyyy-MM-dd").alias("dw_date"))
 
         transformed.printSchema()
 
         return transformed
 
     @staticmethod
-    def writer(spark: SparkSession,
-               df: DataFrame)->Callable[[DataFrame, str], None]:
+    def writer(spark: SparkSession, df: DataFrame, epoch_id: str) -> None:
 
-        def batch_writer( df:DataFrame, epoch_id: str)->None:
+        LOGGER.info(epoch_id)
 
-            spark.logger.info(epoch_id)
-
-            df\
-                .format("orc") \
-                .outputMode("overwrite") \
-                .partitionBy(["dw_date",]) \
-                .saveAsTable("prod.cve_data_by_hour")
-
-        return batch_writer()
+        df\
+            .coalesce(1)\
+            .write \
+            .mode("overwrite") \
+            .format("orc")\
+            .partitionBy(["dw_date",]) \
+            .saveAsTable("cve_data_by_hour")
 
     @classmethod
     def write(cls,
@@ -75,33 +84,24 @@ class Pipeline(object):
 
         query.printSchema()
 
-        query_cts : StreamingQueryManager = query.writeStream\
+        query_cts : StreamingQueryManager = query.writeStream \
+            .option("checkpointLocation", "/tmp/raw/spark_app/")\
             .foreachBatch(partial(cls.writer, spark))\
             .start()
 
         return query_cts
 
     @classmethod
-    def run(cls,
-            path: str = "/local/logs/*") -> StreamingQueryManager:
+    def run(cls, in_path: str) -> None:
 
+        # Get the sparkSession
         spark: SparkSession = cls.get_spark()
-        read: DataFrame = cls.read(spark, path)
-        transformed: DataFrame = cls.transform(spark, read)
-        written: StreamingQueryManager = cls.write(spark, transformed)
 
-        return written
+        # Read in the raw data
+        raw_df: DataFrame = cls.read(spark, in_path)
+        transform_query: StreamingQuery = cls.transform(spark, raw_df)
 
-
-def main():
-
-    Pipeline.run()
-
-
-if __name__ == "__main__":
-
-    main()
-
-
-
+        # Start the streaming query and await termination(this will run forever as-is)
+        query: StreamingQueryManager = cls.write(spark, transform_query)
+        query.awaitTermination()
 

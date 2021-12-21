@@ -6,7 +6,6 @@ set -e -u -o pipefail
 get_log () {
 
   mkdir -p ./logs
-  docker-compose build ingest
   docker-compose run  --rm  ingest bash -c "/opt/scripts/copy_logs.sh"
 }
 
@@ -19,8 +18,8 @@ build () {
   mkdir -p ./tmp
   rm -rf ./tmp/*
 
-  docker-compose build ingest
-  docker-compose build spark-app
+  docker-compose build --no-cache ingest
+  docker-compose build --no-cache spark-app
 }
 
 

@@ -6,7 +6,7 @@ ENV UNAME=appuser
 
 USER root
 
-RUN apt-get update && apt-get install awscli cron  wget -y
+RUN apt-get update && apt-get install awscli cron  wget dumb-init -y
 
 RUN mkdir -p /opt/scripts && mkdir -p /etc/cron.d
 RUN mkdir -p /local/logs
@@ -27,4 +27,5 @@ RUN crontab /etc/cron.d/cronjob
 
 USER $GID:$UID
 
-CMD cron
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/bin/bash"]
+CMD ["cron",]

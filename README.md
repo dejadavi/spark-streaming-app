@@ -1,5 +1,5 @@
-# spark-streaming-app
-Containerized spark structured streaming app reading from the Nvd Json Feed:
+# Nvd Json Feed Spark Streaming App
+A Containerized spark structured streaming app reading from the Nvd Json Feed:
     https://nvd.nist.gov/vuln/data-feeds
 
 **To Build:**

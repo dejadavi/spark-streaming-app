@@ -6,7 +6,7 @@ set -e -u -o pipefail
 get_log () {
 
   mkdir -p ./logs
-  docker-compose run  --rm  ingest "/opt/scripts/copy_logs.sh"
+  docker-compose run --rm  ingest "/opt/scripts/copy_logs.sh"
 }
 
 

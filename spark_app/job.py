@@ -85,6 +85,7 @@ class Job(object):
         query.printSchema()
 
         query_cts : StreamingQueryManager = query.writeStream \
+            .trigger(processingTime='30 seconds') \
             .option("checkpointLocation", "/tmp/raw/spark_app/")\
             .foreachBatch(partial(cls.writer, spark))\
             .start()

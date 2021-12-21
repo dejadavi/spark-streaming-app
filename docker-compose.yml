@@ -35,5 +35,3 @@ services:
       - ./spark_app:/opt/spark_app
       - ./tmp:/tmp
     working_dir: "/home/appuser"
-    depends_on:
-      - ingest

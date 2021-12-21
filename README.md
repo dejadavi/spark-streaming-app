@@ -3,13 +3,14 @@ Containerized spark structured streaming app reading from the Nvd Json Feed:
     https://nvd.nist.gov/vuln/data-feeds
 
 **To Build:**
-    ./cli build
+    `./cli build
 
 **For Pyspark Shell:**
-    ./cli run
+    `./cli shell
 
 **To Run:**
-    ./cli run
+    `./cli run
 
 
-TODO: Add mysql image for hive metastore.
+**TODO:** 
+    - Add mysql image for hive metastore.
